@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask import render_template
 
 from structures import TaggedDocument, TaggedDocumentPersistance
@@ -41,4 +41,4 @@ if __name__ == "__main__":
     files = load_files(args.files_path, args.extension)
     tagged_document_persistance = TaggedDocumentPersistance(args.storage_path)
     tagged_document_persistance.start_persistance_thread()
-    app.run(debug=True)
+    app.run(debug=False)

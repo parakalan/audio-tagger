@@ -2,7 +2,8 @@ from typing import List
 from threading import Thread
 
 import time
-
+import json
+import logging
 
 class TaggedDocument:
     def __init__(self, id_, tag):
@@ -12,10 +13,11 @@ class TaggedDocument:
     
     def to_json(self):
         return {
-            "id": id_,
-            "tag": tag
+            "id": self.id_,
+            "tag": self.tag
         }
-    
+
+    @staticmethod
     def from_json(payload):
         return TaggedDocument(id_=payload["id_"], tag=payload["tag"])
 
@@ -29,7 +31,6 @@ class TaggedDocumentPersistance:
     
     def add(self, tagged_document: TaggedDocument):
         self.documents.append(tagged_document)
-
 
     def persistance_thread(self):
         while 1:
@@ -55,6 +56,6 @@ class TaggedDocumentPersistance:
         logging.error("Stopping persistance thread")
         self.stop_thread = True
         while 1:
-            if not self.mtm_thread.is_alive():
+            if not self.persistance_thread.is_alive():
                 logging.error("Stopped persistance thread")
                 return True
