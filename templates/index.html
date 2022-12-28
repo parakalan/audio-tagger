@@ -2,8 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AudioJs</title>
+    <title>Audio Tagger</title>
     <script type="text/javascript" src="https://msfpt.github.io/AudioJs/audio.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
   </head>
   <style type="text/css">
     body {
@@ -40,7 +41,7 @@
     <h1 style="text-align: center;"> Audio Tagger
     </h1>
     <div class="container">
-      <audio id="audio" src="./music.mp3" AudioJs></audio>
+      <audio id="audio" src="" AudioJs></audio>
       <br><br><br>
       <span class="buttons">
         <button class="button" onclick="choose('ta');">Tani Avartanam [1]</button>
@@ -52,8 +53,32 @@
     </div>
   </body>
   <script type="text/javascript">
+    let current_id = null;
     function choose(choice) {
       console.log(choice);
+      $.ajax({
+			  type: "POST",
+			  url: API_BASE_URL + "subscribe",
+			  data: JSON.stringify(formData),
+			  contentType: "application/json",
+			  encode: true,
+			}).done(function (data) {
+				if(data.status == 200) {
+					$("#hideOnSuccess").hide();
+					$("#hideOnSuccess2").hide();
+					$("#infoText").html(data.message);
+
+				}
+			});
+    }
+
+    function setup() {
+      $.ajax({
+			  type: "GET",
+			  url: "http://127.0.0.1:5000/get"
+			}).done(function (data) {
+        console.log(data);
+			});
     }
 
     document.addEventListener('keypress', (event) => {
@@ -79,5 +104,8 @@
         
       }
     }, false);
+
+
+    setup();
   </script>
 </html>

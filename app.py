@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask import render_template
 
 from structures import TaggedDocument, TaggedDocumentPersistance
@@ -9,13 +9,13 @@ import argparse
 app = Flask(__name__)
 
 files = []
-tagged = []
+tagged_ids = set()
 current_idx = 0
 
 
 def load_files(path, extension):
     files = os.listdir(path)
-    files = [f for f in files if f.lower().endswith(extension.lower())]
+    files = [os.path.join(path, f) for f in files if f.lower().endswith(extension.lower())]
     return files
 
 
@@ -24,11 +24,24 @@ def index():
     return render_template('index.html')
 
 
+@app.route("/get")
+def get():
+    return jsonify({
+        "_id": files[current_idx]
+    })
+
+
 @app.route("/tag", methods=["POST"])
 def tag():
+    global current_idx
     payload = request.json["payload"]
-    tagged_document_persistance.add(TaggedDocument.from_json(payload))
-    return 200
+    tagged_document = TaggedDocument.from_json(payload)
+    tagged_document_persistance.add(tagged_document)
+    current_idx += 1
+    tagged_ids.add(tagged_document.id_)
+    return jsonify({
+        "_id": files[current_idx]
+    })
 
 
 if __name__ == "__main__":

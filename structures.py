@@ -1,9 +1,11 @@
+import os
 from typing import List
 from threading import Thread
 
 import time
 import json
 import logging
+
 
 class TaggedDocument:
     def __init__(self, id_, tag):
@@ -32,22 +34,23 @@ class TaggedDocumentPersistance:
     def add(self, tagged_document: TaggedDocument):
         self.documents.append(tagged_document)
 
-    def persistance_thread(self):
+    def persistance_fn(self):
         while 1:
             if self.stop_thread:
                 self.stop_thread = False
                 return
-            undumped: List[TaggedDocument] = [document for document in self.documents if document.stored == False]
+            undumped: List[TaggedDocument] = [document for document in self.documents if not document.stored]
             for document in undumped:
-                with open(self.storage_path + "/" + document.id_) as f:
+                with open(self.storage_path + "/" + document.id_.split("/")[-1] + ".json", "w") as f:
                     json.dump(document.to_json(), f)
                     document.stored = True
             time.sleep(5)
     
     def start_persistance_thread(self):
+        os.makedirs(self.storage_path, exist_ok=True)
         logging.error("Starting persistance thread")
         self.stop_thread = False
-        self.persistance_thread = Thread(target=self.persistance_thread)
+        self.persistance_thread = Thread(target=self.persistance_fn)
         self.persistance_thread.start()
 
     def stop_persistance_thread(self):
